@@ -1,24 +1,36 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Company.Function.Domain.Enums;
 
 namespace Company.Function.Routers.HttpFuncs;
 
 public sealed class RequestImageAZFunction
 {
-    [Function("RequestImageGeneration")]
-    [QueueOutput("imagequeue", Connection = "AzureWebJobsStorage")]
-    public IActionResult RequestImageGeneration(
-        [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
+    public sealed class Output
     {
-        // absolute minimal message (plain text)
+        [QueueOutput("imagequeue", Connection = "AzureWebJobsStorage")]
+        public string? QueueMessage { get; init; }
+
+        [HttpResult]
+        public HttpResponseData? HttpResponse { get; init; }
+    }
+
+    [Function("RequestImageGeneration")]
+    public Output Run(
+        [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
+    {
         var jobId = Guid.NewGuid();
         var status = JobStatusEnum.STARTED.ToString();
 
-        // this string will be enqueued by the runtime
         var msg = $"{jobId}|{status}";
 
-        return new OkObjectResult(new { jobId, status, enqueued = msg });
+        var response = req.CreateResponse(HttpStatusCode.OK);
+
+        return new Output
+        {
+            QueueMessage = msg,
+            HttpResponse = response
+        };
     }
 }

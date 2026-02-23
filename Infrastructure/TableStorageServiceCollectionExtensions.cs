@@ -15,7 +15,7 @@ public static class TableStorageServiceCollectionExtensions
             ?? configuration["AzureWebJobsStorage"]
             ?? throw new InvalidOperationException("Table storage connection string not found. Set TableStorageConnection or AzureWebJobsStorage.");
 
-        var tableName = configuration["TableStorage:TableName"] ?? "jobs";
+        var tableName = configuration["TableStorage:TableName"] ?? "statustable";
         var queueName = configuration["TableStorage:QueueName"] ?? "imagequeue";
 
         services.AddSingleton(sp => new TableClient(connectionString, tableName));

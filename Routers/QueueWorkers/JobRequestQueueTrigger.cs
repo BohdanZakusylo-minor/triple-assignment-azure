@@ -27,14 +27,26 @@ public sealed class JobRequestQueueTrigger
 
     [Function("ProcessJobRequest")]
     public async Task Run(
-        [QueueTrigger("imagequeue")] string message,
+        [QueueTrigger("imagequeue", Connection = "AzureWebJobsStorage")] string message,
         CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Raw message: {Message}", message);
+
+        var parts = message.Split('|');
+
+        if (parts.Length != 2)
+            throw new InvalidOperationException("Invalid message format");
+
+        if (!Guid.TryParse(parts[0], out var jobId))
+            throw new InvalidOperationException("Invalid Guid");
+
+        if (!Enum.TryParse<JobStatusEnum>(parts[1], true, out var status))
+            throw new InvalidOperationException("Invalid Status");
 
         var entity = new JobEntity
         {
-            Id = new Guid(),
-            Status = JobStatusEnum.STARTED
+            Id = jobId,
+            Status = status
         };
 
         await _repository.AddAsync(entity, cancellationToken);
