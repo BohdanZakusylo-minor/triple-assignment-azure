@@ -3,18 +3,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace Company.RequestImage;
+namespace Company.Function;
 
-public class RequestImageAzHttpTrigger
+public class RequestImagesFunction
 {
-    private readonly ILogger<RequestImageAzHttpTrigger> _logger;
+    private readonly ILogger<RequestImagesFunction> _logger;
 
-    public RequestImageAzHttpTrigger(ILogger<RequestImageAzHttpTrigger> logger)
+    public RequestImagesFunction(ILogger<RequestImagesFunction> logger)
     {
         _logger = logger;
     }
 
-    [Function("RequestImageAzHttpTrigger")]
+    [Function("RequestImagesFunction")]
     public IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");
