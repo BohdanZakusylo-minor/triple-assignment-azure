@@ -1,5 +1,6 @@
 using Azure.Data.Tables;
 using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
 using Company.Function.Domain.Interfaces;
 using Company.Function.Infrastructure.TableStorage;
 using Microsoft.Extensions.Configuration;
@@ -11,16 +12,45 @@ public static class TableStorageServiceCollectionExtensions
 {
     public static IServiceCollection AddTableStorage(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration["TableStorageConnection"]
-            ?? configuration["AzureWebJobsStorage"]
-            ?? throw new InvalidOperationException("Table storage connection string not found. Set TableStorageConnection or AzureWebJobsStorage.");
+        var cs = configuration["TableStorageConnection"]
+                 ?? configuration["AzureWebJobsStorage"]
+                 ?? throw new InvalidOperationException("Set TableStorageConnection or AzureWebJobsStorage.");
 
         var tableName = configuration["TableStorage:TableName"] ?? "statustable";
-        var queueName = configuration["TableStorage:QueueName"] ?? "imagequeue";
 
-        services.AddSingleton(sp => new TableClient(connectionString, tableName));
-        services.AddSingleton(sp => new QueueClient(connectionString, queueName));
+        services.AddSingleton(_ => new TableClient(cs, tableName));
         services.AddSingleton<IProcessRecordRepository, ProcessRecordRepository>();
+
+        services.AddSingleton(_ =>
+        {
+            var q = new QueueClient(cs, "fanout-start", new QueueClientOptions
+            {
+                MessageEncoding = QueueMessageEncoding.Base64
+            });
+            q.CreateIfNotExists();
+            return q;
+        });
+
+        services.AddSingleton(_ =>
+        {
+            var q = new QueueClient(cs, "imagequeue", new QueueClientOptions
+            {
+                MessageEncoding = QueueMessageEncoding.Base64
+            });
+            q.CreateIfNotExists();
+            return q;
+        });
+
+        services.AddHttpClient("buienradar", c =>
+        {
+            c.BaseAddress = new Uri("https://data.buienradar.nl/");
+            c.Timeout = TimeSpan.FromSeconds(10);
+        });
+
+        services.AddHttpClient("images", c =>
+        {
+            c.Timeout = TimeSpan.FromSeconds(15);
+        });
 
         return services;
     }

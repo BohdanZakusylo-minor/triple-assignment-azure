@@ -11,4 +11,6 @@ public sealed class JobTableEntity : ITableEntity
     public ETag ETag { get; set; }
     public Guid Id { get; set; }
     public string Status { get; set; } = default!;
+    public int Total { get; set; }
+    public int Completed { get; set; }
 }

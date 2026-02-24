@@ -1,7 +1,6 @@
 using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Company.Function.Domain.Enums;
 
 namespace Company.Function.Routers.HttpFuncs;
 
@@ -17,19 +16,18 @@ public sealed class RequestImageAZFunction
     }
 
     [Function("RequestImageGeneration")]
-    public Output Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
+    public async Task<Output> Run(
+        [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req,
+        CancellationToken ct)
     {
-        var jobId = Guid.NewGuid();
-        var status = JobStatusEnum.STARTED.ToString();
+        var parentJobId = Guid.NewGuid();
 
-        var msg = $"{jobId}|{status}";
-
-        var response = req.CreateResponse(HttpStatusCode.OK);
+        var response = req.CreateResponse(HttpStatusCode.Accepted);
+        await response.WriteAsJsonAsync(new { jobId = parentJobId, status = "QUEUED" }, ct);
 
         return new Output
         {
-            QueueMessage = msg,
+            QueueMessage = parentJobId.ToString("N"),
             HttpResponse = response
         };
     }
