@@ -1,0 +1,17 @@
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Company.Function.Domain.Interfaces;
+
+public interface IBlobStorage
+{
+    Task<BlobUploadResult> UploadAsync(
+        Stream content,
+        string contentType,
+        string fileName,
+        Guid parentId,
+        CancellationToken ct = default);
+}
+
+public sealed record BlobUploadResult(string BlobName, string Url);

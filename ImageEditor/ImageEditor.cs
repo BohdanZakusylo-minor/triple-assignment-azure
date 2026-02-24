@@ -6,7 +6,7 @@ using SixLabors.ImageSharp.Processing;
 
 namespace Compnay.Function.ImageEditor
 {
-    public class ImageEditor
+    public class ImageHelper
     {
         public static Stream AddTextToImage(Stream imageStream, params (string text, (float x, float y) position, int fontSize, string colorHex)[] texts)
         {

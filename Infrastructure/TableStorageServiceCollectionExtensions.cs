@@ -2,7 +2,7 @@ using Azure.Data.Tables;
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
 using Company.Function.Domain.Interfaces;
-using Company.Function.Infrastructure.TableStorage;
+using Company.Function.Repository;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -30,7 +30,12 @@ public static class TableStorageServiceCollectionExtensions
 
         var tableName = configuration["TableStorage:TableName"] ?? "statustable";
 
-        services.AddSingleton(_ => new TableClient(cs, tableName));
+        services.AddSingleton(_ =>
+        {
+            var client = new TableClient(cs, tableName);
+            client.CreateIfNotExists();
+            return client;
+        });
         services.AddSingleton<IProcessRecordRepository, ProcessRecordRepository>();
 
         services.AddSingleton(_ =>
@@ -52,6 +57,16 @@ public static class TableStorageServiceCollectionExtensions
             q.CreateIfNotExists();
             return new ImageQueue(q);
         });
+
+        services.AddSingleton(_ => new AzureBlobStorageOptions
+        {
+            ConnectionString = configuration["BlobStorageConnection"]
+                               ?? configuration["AzureWebJobsStorage"]
+                               ?? throw new InvalidOperationException("Set BlobStorageConnection or AzureWebJobsStorage."),
+            ContainerName = configuration["BlobStorage:ContainerName"] ?? "blob-for-tripple"
+        });
+
+        services.AddSingleton<IBlobStorage, AzureBlobStorage>();
 
         services.AddHttpClient("buienradar", c =>
         {

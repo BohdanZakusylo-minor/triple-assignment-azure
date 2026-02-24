@@ -2,8 +2,9 @@ using Azure.Data.Tables;
 using Company.Function.Domain.Interfaces;
 using Company.Function.Domain.Entities;
 using Company.Function.Domain.Enums;
+using Company.Function.Infrastructure;
 
-namespace Company.Function.Infrastructure.TableStorage;
+namespace Company.Function.Repository;
 
 public sealed class ProcessRecordRepository : IProcessRecordRepository
 {
