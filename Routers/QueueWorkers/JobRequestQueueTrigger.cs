@@ -61,8 +61,8 @@ public sealed class JobRequestQueueTrigger
 
         var renderedStream = ImageHelper.AddTextToImage(
             imgStream,
-            ("What do you call a developer who doesn't comment code?", (10, 10), 32, "ffffff"),
-            ("A developer", (10, 44), 24, "000000")
+            (job.StationName, (10, 10), 32, "ffffff"),
+            (job.StationId, (10, 44), 24, "000000")
         );
 
         if (renderedStream.CanSeek) renderedStream.Position = 0;

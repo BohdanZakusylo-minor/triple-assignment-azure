@@ -12,6 +12,7 @@ public interface IBlobStorage
         string fileName,
         Guid parentId,
         CancellationToken ct = default);
+    Task<IReadOnlyList<BlobUploadResult>> ListByParentIdAsync(Guid parentId, CancellationToken ct = default);
 }
 
 public sealed record BlobUploadResult(string BlobName, string Url);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -57,5 +58,18 @@ public sealed class AzureBlobStorage : IBlobStorage
             ct);
 
         return new BlobUploadResult(blobName, blob.Uri.ToString());
+    }
+
+    public async Task<IReadOnlyList<BlobUploadResult>> ListByParentIdAsync(Guid parentId, CancellationToken ct = default)
+    {
+        // Must match upload path: UploadAsync uses $"{parentId}/..." (default Guid = hyphenated)
+        var prefix = $"{parentId}/".ToLowerInvariant();
+        var results = new List<BlobUploadResult>();
+        await foreach (var item in _container.GetBlobsAsync(BlobTraits.None, BlobStates.None, prefix, ct))
+        {
+            var blobClient = _container.GetBlobClient(item.Name);
+            results.Add(new BlobUploadResult(item.Name, blobClient.Uri.ToString()));
+        }
+        return results;
     }
 }

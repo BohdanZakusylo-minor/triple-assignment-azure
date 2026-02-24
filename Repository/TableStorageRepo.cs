@@ -85,4 +85,15 @@ public sealed class ProcessRecordRepository : IProcessRecordRepository
             }
         }
     }
+
+    public async Task<JobStatusResult?> GetByJobIdAsync(Guid jobId, CancellationToken ct = default)
+    {
+        const string pk = "jobs";
+        var rk = jobId.ToString("N");
+        var response = await _table.GetEntityIfExistsAsync<JobTableEntity>(pk, rk, cancellationToken: ct);
+        if (!response.HasValue)
+            return null;
+        var e = response.Value;
+        return new JobStatusResult(e.Id, e.Status ?? string.Empty, e.Total, e.Completed);
+    }
 }
