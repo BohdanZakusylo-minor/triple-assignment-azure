@@ -8,7 +8,7 @@ public sealed class RequestImageAZFunction
 {
     public sealed class Output
     {
-        [QueueOutput("imagequeue", Connection = "AzureWebJobsStorage")]
+        [QueueOutput("fanout-start", Connection = "AzureWebJobsStorage")]
         public string? QueueMessage { get; init; }
 
         [HttpResult]

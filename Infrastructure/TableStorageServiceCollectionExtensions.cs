@@ -8,6 +8,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Company.Function.Infrastructure;
 
+public sealed class FanoutStartQueue
+{
+    public QueueClient Client { get; }
+    public FanoutStartQueue(QueueClient client) => Client = client;
+}
+
+public sealed class ImageQueue
+{
+    public QueueClient Client { get; }
+    public ImageQueue(QueueClient client) => Client = client;
+}
+
 public static class TableStorageServiceCollectionExtensions
 {
     public static IServiceCollection AddTableStorage(this IServiceCollection services, IConfiguration configuration)
@@ -28,7 +40,7 @@ public static class TableStorageServiceCollectionExtensions
                 MessageEncoding = QueueMessageEncoding.Base64
             });
             q.CreateIfNotExists();
-            return q;
+            return new FanoutStartQueue(q);
         });
 
         services.AddSingleton(_ =>
@@ -38,7 +50,7 @@ public static class TableStorageServiceCollectionExtensions
                 MessageEncoding = QueueMessageEncoding.Base64
             });
             q.CreateIfNotExists();
-            return q;
+            return new ImageQueue(q);
         });
 
         services.AddHttpClient("buienradar", c =>
