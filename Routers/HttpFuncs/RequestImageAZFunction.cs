@@ -38,7 +38,7 @@ public sealed class RequestImageAZFunction
                 correlationId, parentJobId);
 
             var response = req.CreateResponse(HttpStatusCode.Accepted);
-            await response.WriteAsJsonAsync(new { jobId = parentJobId, status = "STARTED" }, ct);
+            await response.WriteAsJsonAsync(new { jobId = parentJobId, status = "I GUES WORKS" }, ct);
 
             _logger.LogInformation(
                 "RequestImageGeneration accepted. CorrelationId={CorrelationId}, JobId={JobId}",
