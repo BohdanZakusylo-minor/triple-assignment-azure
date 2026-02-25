@@ -77,8 +77,16 @@ public sealed class BuienradarFanoutTrigger
             };
 
             var payload = JsonSerializer.Serialize(job, JsonOptions);
-            await _imageQueue.Client.SendMessageAsync(payload, ct);
-
+            try
+            {
+                await _imageQueue.Client.SendMessageAsync(payload, ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "imagequeue send failed. Queue=imagequeue, ParentJobId={ParentJobId}, StationId={StationId}, MessageLength={Len}. Check AzureWebJobsStorage and queue 'imagequeue' exists.",
+                    parentJobId, stationId, payload?.Length ?? 0);
+                throw;
+            }
             queued++;
         }
 

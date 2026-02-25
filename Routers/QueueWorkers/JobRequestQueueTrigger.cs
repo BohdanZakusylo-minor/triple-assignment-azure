@@ -34,48 +34,66 @@ public sealed class JobRequestQueueTrigger
         [QueueTrigger("imagequeue", Connection = "AzureWebJobsStorage")] string message,
         CancellationToken ct)
     {
+        _logger.LogInformation("imagequeue message received. Length={Len}", message?.Length ?? 0);
 
-        var job = JsonSerializer.Deserialize<StationJobMessage>(message, JsonOptions)
-                  ?? throw new InvalidOperationException("Invalid StationJobMessage JSON.");
-
-        var http = _httpFactory.CreateClient("images");
-
-        using var response = await http.GetAsync(
-            job.ImageUrl,
-            HttpCompletionOption.ResponseHeadersRead,
-            ct);
-
-        if (response.StatusCode == HttpStatusCode.ServiceUnavailable ||
-            (int)response.StatusCode == 429)
+        StationJobMessage job;
+        try
         {
-            throw new HttpRequestException($"Remote service throttled: {(int)response.StatusCode}");
+            job = JsonSerializer.Deserialize<StationJobMessage>(message, JsonOptions)
+                  ?? throw new InvalidOperationException("Invalid StationJobMessage JSON.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "imagequeue: invalid message (not StationJobMessage JSON). Raw length={Len}. Check sender writes valid JSON to queue 'imagequeue'.", message?.Length ?? 0);
+            throw;
         }
 
-        response.EnsureSuccessStatusCode();
+        try
+        {
+            var http = _httpFactory.CreateClient("images");
 
-        var contentType = response.Content.Headers.ContentType?.MediaType;
-        if (contentType is null || !contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException($"Not an image. Content-Type={contentType ?? "null"}");
+            using var response = await http.GetAsync(
+                job.ImageUrl,
+                HttpCompletionOption.ResponseHeadersRead,
+                ct);
 
-        await using var imgStream = await response.Content.ReadAsStreamAsync(ct);
+            if (response.StatusCode == HttpStatusCode.ServiceUnavailable ||
+                (int)response.StatusCode == 429)
+            {
+                throw new HttpRequestException($"Remote service throttled: {(int)response.StatusCode}");
+            }
 
-        var renderedStream = ImageHelper.AddTextToImage(
-            imgStream,
-            (job.StationName, (10, 10), 32, "ffffff"),
-            (job.StationId, (10, 44), 24, "000000")
-        );
+            response.EnsureSuccessStatusCode();
 
-        if (renderedStream.CanSeek) renderedStream.Position = 0;
+            var contentType = response.Content.Headers.ContentType?.MediaType;
+            if (contentType is null || !contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException($"Not an image. Content-Type={contentType ?? "null"}");
 
-        var blobUrl = await _blobStorage.UploadAsync(
-            renderedStream,
-            contentType: "image/png",
-            fileName: "rendered.png",
-            ct: ct,
-            parentId: job.ParentJobId
+            await using var imgStream = await response.Content.ReadAsStreamAsync(ct);
 
-        );
+            var renderedStream = ImageHelper.AddTextToImage(
+                imgStream,
+                (job.StationName, (10, 10), 32, "ffffff"),
+                (job.StationId, (10, 44), 24, "000000")
+            );
 
-        await _repository.IncrementCompletedAndMaybeFinishAsync(job.ParentJobId, ct);
+            if (renderedStream.CanSeek) renderedStream.Position = 0;
+
+            var blobUrl = await _blobStorage.UploadAsync(
+                renderedStream,
+                contentType: "image/png",
+                fileName: "rendered.png",
+                ct: ct,
+                parentId: job.ParentJobId
+            );
+
+            await _repository.IncrementCompletedAndMaybeFinishAsync(job.ParentJobId, ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "ProcessStationJob failed. ParentJobId={ParentJobId}, StationId={StationId}, Error={ErrorType}: {Message}",
+                job.ParentJobId, job.StationId, ex.GetType().Name, ex.Message);
+            throw;
+        }
     }
 }
