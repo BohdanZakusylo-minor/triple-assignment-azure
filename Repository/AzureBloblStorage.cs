@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Azure.Storage.Sas;
 using Company.Function.Domain.Interfaces;
 using Company.Function.Infrastructure;
 
@@ -69,6 +70,29 @@ public sealed class AzureBlobStorage : IBlobStorage
         {
             var blobClient = _container.GetBlobClient(item.Name);
             results.Add(new BlobUploadResult(item.Name, blobClient.Uri.ToString()));
+        }
+        return results;
+    }
+
+    public async Task<IReadOnlyList<BlobUploadResult>> ListByParentIdWithSasAsync(
+        Guid parentId,
+        TimeSpan sasValidity,
+        CancellationToken ct = default)
+    {
+        var prefix = $"{parentId}/".ToLowerInvariant();
+        var results = new List<BlobUploadResult>();
+        var expiresOn = DateTimeOffset.UtcNow.Add(sasValidity);
+
+        await foreach (var item in _container.GetBlobsAsync(BlobTraits.None, BlobStates.None, prefix, ct))
+        {
+            var blobClient = _container.GetBlobClient(item.Name);
+            if (!blobClient.CanGenerateSasUri)
+                throw new InvalidOperationException(
+                    "Blob storage is configured without an account key (e.g. managed identity). " +
+                    "To return image URLs with SAS tokens, set BlobStorageConnection (or AzureWebJobsStorage) to the full connection string from Azure Portal, which includes AccountKey=.");
+
+            var sasUri = blobClient.GenerateSasUri(BlobSasPermissions.Read, expiresOn);
+            results.Add(new BlobUploadResult(item.Name, sasUri.ToString()));
         }
         return results;
     }

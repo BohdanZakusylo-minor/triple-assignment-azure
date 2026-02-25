@@ -16,6 +16,8 @@ public sealed class JobRequestQueueTrigger
     private readonly ILogger<JobRequestQueueTrigger> _logger;
     private readonly UploadImageHandler _uploadImageHandler;
 
+    private readonly string imagesRequesUrl = "https://picsum.photos/800/600";
+
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public JobRequestQueueTrigger(
@@ -40,7 +42,7 @@ public sealed class JobRequestQueueTrigger
         StationJobMessage job;
         try
         {
-            job = JsonSerializer.Deserialize<StationJobMessage>(message, JsonOptions)
+            job = JsonSerializer.Deserialize<StationJobMessage>(message ?? "{}", JsonOptions)
                   ?? throw new InvalidOperationException("Invalid StationJobMessage JSON.");
         }
         catch (Exception ex)
@@ -54,7 +56,7 @@ public sealed class JobRequestQueueTrigger
             var http = _httpFactory.CreateClient("images");
 
             using var response = await http.GetAsync(
-                job.ImageUrl,
+                imagesRequesUrl,
                 HttpCompletionOption.ResponseHeadersRead,
                 ct);
 

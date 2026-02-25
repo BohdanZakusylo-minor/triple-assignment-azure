@@ -13,6 +13,14 @@ public interface IBlobStorage
         Guid parentId,
         CancellationToken ct = default);
     Task<IReadOnlyList<BlobUploadResult>> ListByParentIdAsync(Guid parentId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Lists blobs under the parent and returns URLs with a read-only SAS token for fetching.
+    /// </summary>
+    Task<IReadOnlyList<BlobUploadResult>> ListByParentIdWithSasAsync(
+        Guid parentId,
+        TimeSpan sasValidity,
+        CancellationToken ct = default);
 }
 
 public sealed record BlobUploadResult(string BlobName, string Url);

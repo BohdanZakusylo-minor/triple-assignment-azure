@@ -8,6 +8,8 @@ namespace Company.Function.Routers.HttpFuncs;
 
 public sealed class JobStatusHttpTrigger
 {
+    private const int SasValidityMinutes = 10;
+
     private readonly IProcessRecordRepository _repository;
     private readonly IBlobStorage _blobStorage;
     private readonly ILogger<JobStatusHttpTrigger> _logger;
@@ -44,7 +46,7 @@ public sealed class JobStatusHttpTrigger
             return notFound;
         }
 
-        var blobs = await _blobStorage.ListByParentIdAsync(id, ct);
+        var blobs = await _blobStorage.ListByParentIdWithSasAsync(id, TimeSpan.FromMinutes(SasValidityMinutes), ct);
         var response = req.CreateResponse(HttpStatusCode.OK);
         await response.WriteAsJsonAsync(new
         {
