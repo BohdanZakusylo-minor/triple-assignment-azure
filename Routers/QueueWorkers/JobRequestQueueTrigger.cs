@@ -1,10 +1,11 @@
 using System.Net;
 using System.Text.Json;
+using Company.Function.Domain.Images;
 using Company.Function.Domain.Interfaces;
 using Company.Function.Domain.Messages;
+using Company.Function.ImageEditor;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using Compnay.Function.ImageEditor;
 
 namespace Company.Function.Routers.QueueWorkers;
 
@@ -13,7 +14,7 @@ public sealed class JobRequestQueueTrigger
     private readonly IProcessRecordRepository _repository;
     private readonly IHttpClientFactory _httpFactory;
     private readonly ILogger<JobRequestQueueTrigger> _logger;
-    private readonly IBlobStorage _blobStorage;
+    private readonly UploadImageHandler _uploadImageHandler;
 
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -21,12 +22,12 @@ public sealed class JobRequestQueueTrigger
         IProcessRecordRepository repository,
         IHttpClientFactory httpFactory,
         ILogger<JobRequestQueueTrigger> logger,
-        IBlobStorage blobStorage)
+        UploadImageHandler uploadImageHandler)
     {
         _repository = repository;
         _httpFactory = httpFactory;
         _logger = logger;
-        _blobStorage = blobStorage;
+        _uploadImageHandler = uploadImageHandler;
     }
 
     [Function("ProcessStationJob")]
@@ -79,13 +80,8 @@ public sealed class JobRequestQueueTrigger
 
             if (renderedStream.CanSeek) renderedStream.Position = 0;
 
-            var blobUrl = await _blobStorage.UploadAsync(
-                renderedStream,
-                contentType: "image/png",
-                fileName: "rendered.png",
-                ct: ct,
-                parentId: job.ParentJobId
-            );
+            var cmd = new UploadImageCommand(renderedStream, "image/png", "rendered.png");
+            await _uploadImageHandler.HandleAsync(cmd, job.ParentJobId, ct);
 
             await _repository.IncrementCompletedAndMaybeFinishAsync(job.ParentJobId, ct);
         }

@@ -35,15 +35,11 @@ public sealed class BuienradarClient : IBuienradarClient
             var stationId = GetString(item, "stationid") ?? GetString(item, "stationId") ?? "";
             var stationName = GetString(item, "stationname") ?? GetString(item, "stationName") ?? "";
 
-            // Most feeds provide iconurl; adjust once you inspect the payload you get.
-            var imageUrl = GetString(item, "iconurl") ?? GetString(item, "iconUrl") ?? "";
+            // Many feeds don't provide iconurl; use default image URL so we still process the station.
+            var imageUrl = GetString(item, "iconurl") ?? GetString(item, "iconUrl") ?? "https://picsum.photos/800/600";
 
-            if (string.IsNullOrWhiteSpace(stationId) ||
-                string.IsNullOrWhiteSpace(stationName) ||
-                string.IsNullOrWhiteSpace(imageUrl))
-            {
-                continue; // skip incomplete station records
-            }
+            if (string.IsNullOrWhiteSpace(stationId) || string.IsNullOrWhiteSpace(stationName))
+                continue;
 
             result.Add(new BuienradarStationDto
             {

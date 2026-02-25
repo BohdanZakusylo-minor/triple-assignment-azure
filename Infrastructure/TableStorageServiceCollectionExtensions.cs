@@ -1,7 +1,11 @@
 using Azure.Data.Tables;
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
+using Company.Function.Application;
+using Company.Function.Domain.Images;
 using Company.Function.Domain.Interfaces;
+using Company.Function.Infrastructure.Queues;
+using Company.Function.Infrastructure.Weather;
 using Company.Function.Repository;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -67,12 +71,19 @@ public static class TableStorageServiceCollectionExtensions
         });
 
         services.AddSingleton<IBlobStorage, AzureBlobStorage>();
+        services.AddSingleton<UploadImageHandler>();
 
         services.AddHttpClient("buienradar", c =>
         {
             c.BaseAddress = new Uri("https://data.buienradar.nl/");
             c.Timeout = TimeSpan.FromSeconds(10);
         });
+
+        services.AddSingleton<IBuienradarClient>(sp =>
+            new BuienradarClient(sp.GetRequiredService<IHttpClientFactory>().CreateClient("buienradar")));
+        services.AddSingleton<IJobQueue>(sp =>
+            new AzureQueueJobQueue(sp.GetRequiredService<ImageQueue>().Client));
+        services.AddSingleton<StationFanOutService>();
 
         services.AddHttpClient("images", c =>
         {

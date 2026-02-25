@@ -17,14 +17,19 @@ public sealed class StationFanOutService
         _queue = queue;
     }
 
-    public async Task<int> FanOutAsync(int count, CancellationToken ct)
+    /// <summary>
+    /// Fetches stations from Buienradar and enqueues a <see cref="StationJobMessage"/> per station for the given parent job.
+    /// </summary>
+    /// <returns>Number of messages enqueued.</returns>
+    public async Task<int> FanOutAsync(Guid parentJobId, int count, CancellationToken ct)
     {
         var stations = await _client.GetStationsAsync(count, ct);
 
         foreach (var s in stations)
         {
-            var msg = new StationImageJobMessage
+            var msg = new StationJobMessage
             {
+                ParentJobId = parentJobId,
                 StationId = s.StationId,
                 StationName = s.StationName,
                 ImageUrl = s.ImageUrl

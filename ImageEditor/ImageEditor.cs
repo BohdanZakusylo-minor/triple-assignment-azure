@@ -5,7 +5,7 @@ using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
-namespace Compnay.Function.ImageEditor
+namespace Company.Function.ImageEditor
 {
     public class ImageHelper
     {
