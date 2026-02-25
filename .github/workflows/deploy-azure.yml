@@ -1,6 +1,9 @@
 name: Deploy to Azure Function App
 
 on:
+  push:
+    branches:
+      - az-deployment
   pull_request:
     branches:
       - az-deployment
