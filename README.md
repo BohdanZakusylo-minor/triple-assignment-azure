@@ -72,6 +72,6 @@ For VS Code REST Client, use the `api.http` file and set the `code` / `functionK
 
 - **SAS tokens for finished images** — Blob container is private (`PublicAccessType.None`). The status endpoint returns SAS URLs (10-minute validity) only; no public blob URLs. - DONE  
 
-- **Build and deploy from GitHub** — GitHub Actions workflow (`.github/workflows/deploy-azure.yml`) builds and deploys on push/PR to the `az-deployment` branch using Azure Functions publish profile. - DONE (Deployed from github, please see pull request to )  
+- **Build and deploy from GitHub** — GitHub Actions workflow (`.github/workflows/deploy-azure.yml`) builds and deploys on push/PR to the `az-deployment` branch using Azure Functions publish profile. - DONE (Deployed from github, please see pull request to https://github.com/BohdanZakusylo-minor/triple-assignment-azure/pull/4)  
 
 - **Status endpoint and Table Storage** — `GetJobStatus` returns progress and blob list; job state is stored in Table Storage (STARTED, completed count, FINISHED). - DONE
