@@ -1,5 +1,5 @@
 using System.Net;
-using Company.Function.Domain.Interfaces;
+using Company.Function.Infrastrucure.Interfaces;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;

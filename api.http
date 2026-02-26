@@ -1,0 +1,23 @@
+### Azure Function App – HTTP requests
+### If "Send Request" doesn't appear: click "Plain Text" in the status bar (bottom-right) and choose "HTTP".
+### Use with VS Code REST Client. Replace {{baseUrl}} and {{functionKey}}.
+### Local: baseUrl = http://localhost:7071   Azure: baseUrl = https://<your-app>.azurewebsites.net
+### Get function key: Azure Portal → Function App → App keys (default or per-function key)
+
+@baseUrl = https://assignment-for-tripple-az.azurewebsites.net
+
+
+#please paste the jobId that was received from the POST endpoint 
+#(maybe wait a few seconds before the worker actuall takes over the job) but it works I swear :)!!!!
+@receivedJobId = 
+###############################################################################
+# RequestImageGeneration – start a new image generation job (POST)
+# Returns 202 with jobId and status "QUEUED". Use jobId with GetJobStatus.
+###############################################################################
+POST {{baseUrl}}/api/RequestImageGeneration?code={{functionKeyRequestJob}}
+Content-Type: application/json
+
+###############################################################################
+# RequestImagesFunction – welcome / health (GET or POST)
+###############################################################################
+GET {{baseUrl}}/api/GetJobStatus?jobId={{receivedJobId}}&code={{functionKeyGetJob}}
