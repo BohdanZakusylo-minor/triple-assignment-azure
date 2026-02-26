@@ -1,5 +1,3 @@
-# Full deploy (first time): .\deploy-script.ps1
-# Update existing Function App (code only): .\deploy-script.ps1 -FunctionAppNameOverride "your-existing-func-app-name"
 param(
     [string]$ResourceGroup = "assignmentfortrippleaz",
     [string]$Location = "germanywestcentral",
@@ -22,14 +20,12 @@ try {
     az login | Out-Null
 }
 
-# Resolve paths
 $ProjectPath  = Resolve-Path (Join-Path $PSScriptRoot $Project)
 $PublishPath  = Join-Path $PSScriptRoot $PublishDir
 
 $functionAppName = ""
 
 if ($CodeOnly -or $FunctionAppNameOverride) {
-    # Update existing Function App: skip Bicep, deploy code only
     if (-not $FunctionAppNameOverride) {
         throw "When using -CodeOnly you must pass -FunctionAppNameOverride with your existing Function App name."
     }
@@ -38,7 +34,6 @@ if ($CodeOnly -or $FunctionAppNameOverride) {
     Write-Host "Ensuring resource group exists..."
     az group create --name $ResourceGroup --location $Location | Out-Null
 } else {
-    # Full deploy: Bicep + code
     Write-Host "Creating resource group..."
     az group create --name $ResourceGroup --location $Location | Out-Null
 
@@ -67,22 +62,18 @@ if ($CodeOnly -or $FunctionAppNameOverride) {
 
 Write-Host "Function App Name: $functionAppName"
 
-# Publish .NET project
 Write-Host "Publishing project..."
 if (Test-Path $PublishPath) { Remove-Item $PublishPath -Recurse -Force }
 dotnet publish $ProjectPath --configuration Release --output $PublishPath
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed." }
 
-# Verify host.json exists
 if (-not (Test-Path (Join-Path $PublishPath "host.json"))) {
     throw "host.json missing. Wrong project?"
 }
 
-# Azure expects .azurefunctions at zip root for package validation
 $azureFuncDir = Join-Path $PublishPath ".azurefunctions"
 New-Item -ItemType Directory -Path $azureFuncDir -Force | Out-Null
 
-# Zip contents (include hidden items like .azurefunctions - "*" can skip them on Windows)
 $zipPath = Join-Path $PSScriptRoot "functionapp.zip"
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 
@@ -92,7 +83,6 @@ $itemsToZip = Get-ChildItem -Force
 Compress-Archive -Path $itemsToZip -DestinationPath $zipPath
 Pop-Location
 
-# Deploy zip
 Write-Host "Deploying zip..."
 az functionapp deployment source config-zip `
     --resource-group $ResourceGroup `

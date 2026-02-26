@@ -21,7 +21,6 @@ param extraAppSettings array = []
 var uniqueSuffix = uniqueString(resourceGroup().id, baseName)
 var baseLower = toLower(baseName)
 
-// Storage account name: 3-24, lowercase+digits only
 var storageAccountName = toLower('${take(replace(baseLower, '-', ''), 11)}${uniqueSuffix}')
 
 var functionAppName = empty(functionAppNameOverride)
@@ -36,7 +35,6 @@ var planName = empty(functionAppNameOverride)
   ? toLower('${baseLower}-${uniqueSuffix}-plan')
   : toLower('${functionAppName}-plan')
 
-// Common connection string for the storage account we create
 var storageConnString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
