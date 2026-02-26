@@ -48,36 +48,30 @@ curl "https://assignment-for-tripple-az.azurewebsites.net/api/GetJobStatus?jobId
 
 For VS Code REST Client, use the `api.http` file and set the `code` / `functionKeyRequestJob` / `functionKeyGetJob` variables to the keys from Azure Portal.
 
-## Project layout
 
-- **Routers/HttpFuncs** — `RequestImageGeneration`, `GetJobStatus`.
-- **Routers/QueueWorkers** — `BuienradarFanout`, `ProcessStationJob`.
-- **Infrastructure** — Buienradar client, DI, blob/table/queue configuration.
-- **Repository** — Table Storage (job status), Blob Storage (uploads, SAS).
-- **Domain** — DTOs, messages, entities, image commands.
-- **Services** — `StationFanOutService` (Buienradar → job queue).
-- **ImageEditor** — Text overlay on images (ImageSharp).
 
 
 ## Requirements
 
-### Must
+## ### Must
 
-o	Expose publicly accessible API for requesting a set of fresh images with current weather data using a HttpTrigger. - DONE
-o	Employ QueueTrigger to process the job in the background so the initial call stays fast. - DONE
-o	Employ Blob Storage to store all generated images and to expose the files. - DONE
-o	Employ Buienrader api to get weather station data - DONE
-o	Employ any public api for retrieving an image to write the weather data on. - DONE (used picsum)
-o	Expose a publicly accessible API for fetching the generated images using HttpTriggers. - DONE (combined with could requirement, it gets the status and images links)
-o	Provide HTTP files as API documentation. - DONE
-o	Create a fitting Bicep template (include the queues as well). - DONE
-o	Create a deploy.ps1 script that publishes your code using the dotnet cli, creates the resources in azure using the Bicep template and deploys the function using the azure cli. - DONE
-o	Employ multiple queues, one for starting the job and one for fetching and updating an image. - DONE
-o	Deploy the code to azure and have a working endpoint. - DONE
+- Expose publicly accessible API for requesting a set of fresh images with current weather data using a HttpTrigger. - DONE  
+- Employ QueueTrigger to process the job in the background so the initial call stays fast. - DONE  
+- Employ Blob Storage to store all generated images and to expose the files. - DONE  
+- Employ Buienrader api to get weather station data - DONE  
+- Employ any public api for retrieving an image to write the weather data on. - DONE (used picsum)  
+- Expose a publicly accessible API for fetching the generated images using HttpTriggers. - DONE (combined with could requirement, it gets the status and images links)  
+- Provide HTTP files as API documentation. - DONE  
+- Create a fitting Bicep template (include the queues as well). - DONE  
+- Create a deploy.ps1 script that publishes your code using the dotnet cli, creates the resources in azure using the Bicep template and deploys the function using the azure cli. - DONE  
+- Employ multiple queues, one for starting the job and one for fetching and updating an image. - DONE  
+- Deploy the code to azure and have a working endpoint. - DONE  
 
 
-### Could
+## ### Could
 
-- **SAS tokens for finished images** — Blob container is private (`PublicAccessType.None`). The status endpoint returns SAS URLs (10-minute validity) only; no public blob URLs. - DONE
-- **Build and deploy from GitHub** — GitHub Actions workflow (`.github/workflows/deploy-azure.yml`) builds and deploys on push/PR to the `az-deployment` branch using Azure Functions publish profile.- DONE (Deployed from github, please see pull request to )
+- **SAS tokens for finished images** — Blob container is private (`PublicAccessType.None`). The status endpoint returns SAS URLs (10-minute validity) only; no public blob URLs. - DONE  
+
+- **Build and deploy from GitHub** — GitHub Actions workflow (`.github/workflows/deploy-azure.yml`) builds and deploys on push/PR to the `az-deployment` branch using Azure Functions publish profile. - DONE (Deployed from github, please see pull request to )  
+
 - **Status endpoint and Table Storage** — `GetJobStatus` returns progress and blob list; job state is stored in Table Storage (STARTED, completed count, FINISHED). - DONE
