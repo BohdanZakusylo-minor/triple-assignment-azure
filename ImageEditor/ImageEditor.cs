@@ -9,9 +9,6 @@ namespace Company.Function.ImageEditor
 {
     public class ImageHelper
     {
-        /// <summary>
-        /// Font family names to try in order. Arial on Windows; Liberation Sans/DejaVu Sans on Linux (e.g. Azure).
-        /// </summary>
         private static readonly string[] FontFamilyFallbacks = { "Arial", "Liberation Sans", "DejaVu Sans", "Ubuntu", "sans-serif" };
 
         private static FontFamily? _embeddedFontFamily;
@@ -23,10 +20,8 @@ namespace Company.Function.ImageEditor
                 if (SystemFonts.TryFind(familyName, out var family))
                     return family.CreateFont(size);
             }
-            // Azure/minimal Linux often has no system fonts; use first available or embedded.
             if (SystemFonts.Families.Any())
                 return SystemFonts.Families.First().CreateFont(size);
-            // Load embedded font (ImageEditor/DefaultFont.ttf as EmbeddedResource).
             return GetEmbeddedFontFamily().CreateFont(size);
         }
 

@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using Company.Function.Domain.Images;
-using Company.Function.Domain.Interfaces;
+using Company.Function.Infrastrucure.Interfaces;
 using Company.Function.Domain.Messages;
 using Company.Function.ImageEditor;
 using Microsoft.Azure.Functions.Worker;

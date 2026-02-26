@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Company.Function.Domain.Interfaces;
+using Company.Function.Infrastrucure.Interfaces;
 using Company.Function.Domain.Messages;
 
 namespace Company.Function.Application;
@@ -16,11 +16,6 @@ public sealed class StationFanOutService
         _client = client;
         _queue = queue;
     }
-
-    /// <summary>
-    /// Fetches stations from Buienradar and enqueues a <see cref="StationJobMessage"/> per station for the given parent job.
-    /// </summary>
-    /// <returns>Number of messages enqueued.</returns>
     public async Task<int> FanOutAsync(Guid parentJobId, int count, CancellationToken ct)
     {
         var stations = await _client.GetStationsAsync(count, ct);

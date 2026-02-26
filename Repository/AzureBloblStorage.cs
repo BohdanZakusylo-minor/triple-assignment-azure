@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
-using Company.Function.Domain.Interfaces;
+using Company.Function.Infrastrucure.Interfaces;
 using Company.Function.Infrastructure;
 
 namespace Company.Function.Repository;
@@ -51,7 +51,7 @@ public sealed class AzureBlobStorage : IBlobStorage
             CacheControl = "public, max-age=31536000"
         };
 
-        content.Position = 0; // important if stream was read earlier
+        content.Position = 0;
 
         await blob.UploadAsync(
             content,
@@ -63,7 +63,6 @@ public sealed class AzureBlobStorage : IBlobStorage
 
     public async Task<IReadOnlyList<BlobUploadResult>> ListByParentIdAsync(Guid parentId, CancellationToken ct = default)
     {
-        // Must match upload path: UploadAsync uses $"{parentId}/..." (default Guid = hyphenated)
         var prefix = $"{parentId}/".ToLowerInvariant();
         var results = new List<BlobUploadResult>();
         await foreach (var item in _container.GetBlobsAsync(BlobTraits.None, BlobStates.None, prefix, ct))

@@ -1,4 +1,4 @@
-using Company.Function.Domain.Interfaces;
+using Company.Function.Infrastrucure.Interfaces;
 using Azure.Storage.Queues;
 
 namespace Company.Function.Infrastructure.Queues;

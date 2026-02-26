@@ -1,4 +1,4 @@
-namespace Company.Function.Application.Abstractions;
+namespace Company.Function.Infrastrucure.Interfaces;
 
 public interface IImageFetcher
 {

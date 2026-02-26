@@ -1,7 +1,7 @@
 using Azure.Data.Tables;
 using Company.Function.Domain.Entities;
 using Company.Function.Domain.Enums;
-using Company.Function.Domain.Interfaces;
+using Company.Function.Infrastrucure.Interfaces;
 using Company.Function.Infrastructure;
 using Microsoft.Extensions.Logging;
 
