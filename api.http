@@ -1,11 +1,5 @@
-### Azure Function App – HTTP requests
-### If "Send Request" doesn't appear: click "Plain Text" in the status bar (bottom-right) and choose "HTTP".
-### Use with VS Code REST Client. Replace {{baseUrl}} and {{functionKey}}.
-### Local: baseUrl = http://localhost:7071   Azure: baseUrl = https://<your-app>.azurewebsites.net
-### Get function key: Azure Portal → Function App → App keys (default or per-function key)
-
 @baseUrl = https://assignment-for-tripple-az.azurewebsites.net
-
+#paste the variables from the email here
 
 #please paste the jobId that was received from the POST endpoint 
 #(maybe wait a few seconds before the worker actuall takes over the job) but it works I swear :)!!!!
@@ -18,6 +12,7 @@ POST {{baseUrl}}/api/RequestImageGeneration?code={{functionKeyRequestJob}}
 Content-Type: application/json
 
 ###############################################################################
-# RequestImagesFunction – welcome / health (GET or POST)
+# GetJobStatus – get job progress and SAS links to finished images (GET)
+# Returns 200 with jobId, status, completed, total, and outputs (array of { name, url } with time-limited SAS URLs).
 ###############################################################################
 GET {{baseUrl}}/api/GetJobStatus?jobId={{receivedJobId}}&code={{functionKeyGetJob}}
