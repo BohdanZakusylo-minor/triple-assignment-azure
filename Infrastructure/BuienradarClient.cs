@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Company.Function.Domain.DTO;
-using Company.Function.Domain.Interfaces;
+using Company.Function.Infrastrucure.Interfaces;
 
 namespace Company.Function.Infrastructure.Weather;
 
@@ -18,7 +18,6 @@ public sealed class BuienradarClient : IBuienradarClient
         await using var stream = await resp.Content.ReadAsStreamAsync(ct);
         using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: ct);
 
-        // expected: root.actual.stationmeasurements = array
         if (!doc.RootElement.TryGetProperty("actual", out var actual) ||
             !actual.TryGetProperty("stationmeasurements", out var arr) ||
             arr.ValueKind != JsonValueKind.Array)
@@ -35,7 +34,6 @@ public sealed class BuienradarClient : IBuienradarClient
             var stationId = GetString(item, "stationid") ?? GetString(item, "stationId") ?? "";
             var stationName = GetString(item, "stationname") ?? GetString(item, "stationName") ?? "";
 
-            // Many feeds don't provide iconurl; use default image URL so we still process the station.
             var imageUrl = GetString(item, "iconurl") ?? GetString(item, "iconUrl") ?? "https://picsum.photos/800/600";
 
             if (string.IsNullOrWhiteSpace(stationId) || string.IsNullOrWhiteSpace(stationName))

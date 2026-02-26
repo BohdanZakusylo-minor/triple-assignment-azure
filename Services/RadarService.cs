@@ -1,5 +1,5 @@
 using System.Net.Http;
-using Company.Function.Domain.Interfaces;
+using Company.Function.Infrastrucure.Interfaces;
 
 namespace Company.Function.Services;
 

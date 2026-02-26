@@ -1,6 +1,6 @@
 using Company.Function.Domain.Entities;
 
-namespace Company.Function.Domain.Interfaces;
+namespace Company.Function.Infrastrucure.Interfaces;
 
 public interface IProcessRecordRepository
 {

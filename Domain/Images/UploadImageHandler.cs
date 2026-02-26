@@ -1,6 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Company.Function.Domain.Interfaces;
+using Company.Function.Infrastrucure.Interfaces;
 
 namespace Company.Function.Domain.Images;
 
